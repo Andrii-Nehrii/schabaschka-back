@@ -1,0 +1,41 @@
+
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/schabaschka
+    username: sch_user
+    password: sch_pass
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  jackson:
+    time-zone: UTC
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+  flyway:
+    enabled: true
+  mvc:
+    cors:
+      mappings:
+        "[/api/**]":
+          allowed-origins: "http://localhost:5173"
+          allowed-methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+          allowed-headers: "*"
+          allow-credentials: true
+          max-age: 3600
+
+logging:
+  level:
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
+    org.flywaydb.core: INFO
