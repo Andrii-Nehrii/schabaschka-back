@@ -5,5 +5,6 @@ public enum JobCategory {
     REPAIR,
     BEAUTY,
     DOG_WALK,
-    NANNY
+    NANNY,
+
 }

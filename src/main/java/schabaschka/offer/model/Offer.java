@@ -29,6 +29,9 @@ public class Offer {
 
     @PrePersist
     public void prePersist() {
+        if (status == null){
+            status = Status.PENDING;
+        }
         if(createdAt == null) {
             createdAt = OffsetDateTime.now();
         }

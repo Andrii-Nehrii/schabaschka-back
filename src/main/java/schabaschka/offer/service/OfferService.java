@@ -20,4 +20,5 @@ public interface OfferService {
     OfferDto changeStatus(Long id, Offer.Status newStatus);
 
     void closePendingOffersForJob(long jobId);
+
 }

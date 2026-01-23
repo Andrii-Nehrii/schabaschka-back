@@ -3,6 +3,7 @@ package schabaschka.user.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import schabaschka.security.SecurityUtils;
 import schabaschka.user.dto.UserDto;
 import schabaschka.user.service.UserService;
 
@@ -19,6 +20,14 @@ public class UserController {
         this.userService = userService;
     }
 
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> me() {
+       long userId = SecurityUtils.getCurrentUserId();
+       Optional<UserDto> userOpt =  userService.findById(userId);
+       return userOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getById( @PathVariable long id ){

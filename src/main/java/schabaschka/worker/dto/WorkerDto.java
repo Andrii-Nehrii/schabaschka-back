@@ -1,33 +1,29 @@
-package schabaschka.profile.dto;
+package schabaschka.worker.dto;
 
-public class ProfileDto {
-    private Long id;
+public class WorkerDto {
     private Long userId;
+    private Long profileId;
     private String name;
     private String surname;
     private String phone;
+    private String email;
     private String city;
+    private String role;
     private String[] categories;
 
-    public ProfileDto(Long id, Long userId, String name, String surname, String phone, String city, String[] categories) {
-        this.id = id;
+    public WorkerDto() {
+    }
+
+    public WorkerDto(Long userId, Long profileId, String name, String surname, String phone, String email, String city, String role, String[] categories) {
         this.userId = userId;
+        this.profileId = profileId;
         this.name = name;
         this.surname = surname;
         this.phone = phone;
+        this.email = email;
         this.city = city;
+        this.role = role;
         this.categories = categories;
-    }
-
-    public ProfileDto() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Long getUserId() {
@@ -36,6 +32,14 @@ public class ProfileDto {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getProfileId() {
+        return profileId;
+    }
+
+    public void setProfileId(Long profileId) {
+        this.profileId = profileId;
     }
 
     public String getName() {
@@ -62,12 +66,28 @@ public class ProfileDto {
         this.phone = phone;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getCity() {
         return city;
     }
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String[] getCategories() {

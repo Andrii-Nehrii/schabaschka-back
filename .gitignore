@@ -31,3 +31,18 @@ build/
 
 ### VS Code ###
 .vscode/
+
+/target/
+/logs/
+/out/
+
+.idea/
+/.vscode/
+/*.iml
+
+.DS_Store
+Thumbs.db
+
+hs_err_pid*
+replay_pid*
+

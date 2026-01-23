@@ -1,5 +1,6 @@
 package schabaschka.chat.service;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import schabaschka.chat.dao.OfferMessageRepository;
@@ -10,6 +11,7 @@ import schabaschka.job.dao.JobRepository;
 import schabaschka.job.model.Job;
 import schabaschka.offer.dao.OfferRepository;
 import schabaschka.offer.model.Offer;
+import schabaschka.security.SecurityUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +36,20 @@ public class OfferMessageServiceImpl implements OfferMessageService {
         if (offerId == null) {
             throw new IllegalArgumentException("offerId is null");
         }
+
+        Offer offer = offerRepository.findById(offerId).orElseThrow(() -> new IllegalArgumentException("offer id not found " + offerId ));
+        if(offer.getJobId() == null){
+            throw new IllegalArgumentException("jobId is null");
+        }
+        Job job = jobRepository.findById(offer.getJobId()).orElseThrow(() -> new IllegalArgumentException("job id not found " + offer.getJobId()));
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        boolean isWorker = currentUserId.equals(offer.getWorkerId());
+        boolean isEmployer = currentUserId.equals(job.getEmployerId());
+
+        if(!isWorker && !isEmployer){
+            throw new AccessDeniedException("Forbidden");
+        }
+
         List<OfferMessage> messages = offerMessageRepository.findByOfferIdOrderByCreatedAtAsc(offerId);
 
         return messages.stream().map(this::toDto).collect(Collectors.toList());
@@ -54,27 +70,28 @@ public class OfferMessageServiceImpl implements OfferMessageService {
         }
 
         Offer offer = offerRepository.findById(offerId).orElseThrow(()-> new IllegalArgumentException("Offer not found: " + offerId));
+        if(offer.getJobId() == null){
+            throw new IllegalArgumentException("jobId must not be null");
+        }
         Job job = jobRepository.findById(offer.getJobId()).orElseThrow(()->  new IllegalArgumentException("Job not found for offer: " + offer.getJobId()));
 
-        Long senderId = newOfferMessageDto.getSenderId();
 
-        if (senderId == null) {
-            throw new IllegalArgumentException("senderId must not be null");
-        }
+        Long senderId = SecurityUtils.getCurrentUserId();
+
+
 
         boolean isWorker = senderId.equals(offer.getWorkerId());
         boolean isEmployer = senderId.equals(job.getEmployerId());
 
         if (!isWorker && !isEmployer) {
-            throw new IllegalArgumentException(
-                    "Sender " + senderId + " is not worker or employer of offer " + offerId
-            );
+            throw new AccessDeniedException("Forbidden");
+
         }
 
 
         OfferMessage message = new OfferMessage();
         message.setOfferId(offerId);
-        message.setSenderId(newOfferMessageDto.getSenderId());
+        message.setSenderId(senderId);
         message.setText(newOfferMessageDto.getText());
         OfferMessage saved = offerMessageRepository.save(message);
         return toDto(saved);

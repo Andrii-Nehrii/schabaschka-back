@@ -10,11 +10,14 @@ import schabaschka.job.dto.JobDto;
 import schabaschka.job.dto.NewJobDto;
 import schabaschka.job.dto.UpdateJobDto;
 import schabaschka.job.service.JobService;
+import schabaschka.security.JwtTokenService;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+
+import schabaschka.security.SecurityUtils;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -52,29 +55,37 @@ public class JobController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public JobDto create(@RequestParam("employerId") long employerId, @RequestBody NewJobDto newJobDto){
+    public JobDto create(@RequestBody NewJobDto newJobDto){
+       SecurityUtils.requireRole("EMPLOYER");
+        long employerId = SecurityUtils.getCurrentUserId();
         return jobService.create(employerId, newJobDto);
     }
 
 
     @PutMapping("/{id}")
-    public JobDto update(@PathVariable("id") long jobId, @RequestParam("employerId") long employerId, @RequestBody UpdateJobDto updateJobDto){
+    public JobDto update(@PathVariable("id") long jobId, @RequestBody UpdateJobDto updateJobDto){
+        SecurityUtils.requireRole("EMPLOYER");
+        long employerId = SecurityUtils.getCurrentUserId();
        return jobService.update(employerId,jobId , updateJobDto);
     }
 
     @PatchMapping("/{id}/status")
-    public JobDto changeStatus(@PathVariable("id") long jobId, @RequestParam("employerId") long employerId, @RequestParam("status") String status){
+    public JobDto changeStatus(@PathVariable("id") long jobId, @RequestParam("status") String status){
         JobStatus newStatus = parseStatus(status);
         if (newStatus == null) {
             throw new IllegalArgumentException("Unknown job status: " + status);
         }
-
+        SecurityUtils.requireRole("EMPLOYER");
+        long employerId = SecurityUtils.getCurrentUserId();
         return jobService.changeStatus(employerId, jobId, newStatus);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("id") long jobId, @RequestParam("employerId") long employerId) {
+    public void delete(@PathVariable("id") long jobId) {
+        SecurityUtils.requireRole("EMPLOYER");
+        long employerId = SecurityUtils.getCurrentUserId();
+
         jobService.delete(employerId, jobId);
     }
 

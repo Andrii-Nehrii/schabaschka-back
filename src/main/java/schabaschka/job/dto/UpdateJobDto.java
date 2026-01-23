@@ -5,8 +5,8 @@ import schabaschka.job.JobCategory;
 import java.math.BigDecimal;
 
 public class UpdateJobDto {
-    String title;
-    String description;
+    private String title;
+    private String description;
     private String city;
     private JobCategory category;
     private BigDecimal price;

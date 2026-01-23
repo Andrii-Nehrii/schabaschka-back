@@ -2,10 +2,7 @@ package schabaschka.profile.controller;
 
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import schabaschka.profile.dto.ProfileDto;
 import schabaschka.profile.service.ProfileService;
 
@@ -35,6 +32,17 @@ public class ProfileController {
     @GetMapping
     public List<ProfileDto> list() {
         return profileService.findAll();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ProfileDto> getMyProfile() {
+        Optional<ProfileDto> profileOpt = profileService.findMyProfile();
+        return profileOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/me")
+    public ProfileDto updateMyProfile(@RequestBody ProfileDto profileDto) { 
+        return profileService.updateMyProfile(profileDto);
     }
 
 

@@ -15,4 +15,8 @@ public interface ProfileService {
 
     List<ProfileDto> findAll();
 
+    Optional<ProfileDto> findMyProfile();
+
+    ProfileDto updateMyProfile(ProfileDto profileDto);
+
 }

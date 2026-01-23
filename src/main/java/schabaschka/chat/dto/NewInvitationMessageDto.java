@@ -1,21 +1,15 @@
 package schabaschka.chat.dto;
 
-public class NewOfferMessageDto {
-
+public class NewInvitationMessageDto {
 
     private String text;
 
-    public NewOfferMessageDto() {
+    public NewInvitationMessageDto() {
     }
 
-    public NewOfferMessageDto(Long senderId, String text) {
-
+    public NewInvitationMessageDto(String text) {
         this.text = text;
     }
-
-
-
-
 
     public String getText() {
         return text;
