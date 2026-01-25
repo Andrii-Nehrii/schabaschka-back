@@ -1,6 +1,7 @@
 package schabaschka.security;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,6 +17,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,11 +26,13 @@ import java.util.List;
  * - /api/auth/login + /api/auth/register = permitAll
  * - /api/health/** = permitAll
  * - всё остальное требует JWT
- * - CORS строго под Vite dev: 5173
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+
+    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}")
+    private String corsAllowedOrigins;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenService jwtTokenService) throws Exception {
@@ -42,9 +46,12 @@ public class SecurityConfiguration {
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/auth/**").permitAll()
 
-                        .requestMatchers("/error").permitAll() //changed
+
+
+                        .requestMatchers("/error").permitAll()
 
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/health/**").permitAll()
@@ -65,11 +72,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173"
-        ));
-
+        config.setAllowedOrigins(parseOrigins(corsAllowedOrigins));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Content-Type", "Authorization", "Accept"));
         config.setAllowCredentials(true);
@@ -78,6 +81,18 @@ public class SecurityConfiguration {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    private List<String> parseOrigins(String raw) {
+        List<String> result = new ArrayList<>();
+        if (raw == null) return result;
+
+        String[] parts = raw.split(",");
+        for (int i = 0; i < parts.length; i++) {
+            String v = parts[i].trim();
+            if (!v.isEmpty()) result.add(v);
+        }
+        return result;
     }
 
     @Bean
