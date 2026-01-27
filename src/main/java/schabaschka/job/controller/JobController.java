@@ -88,9 +88,22 @@ public class JobController {
 
         jobService.delete(employerId, jobId);
     }
+    @GetMapping("/my")
+    public Page<JobDto> myJobs(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        SecurityUtils.requireRole("EMPLOYER");
+        long employerId = SecurityUtils.getCurrentUserId();
+        JobStatus st = parseStatus(status);
+        return jobService.findMyPage(employerId, st, q, page, size);
+    }
 
 
-        private JobCategory parseCategory(String s) {
+
+    private JobCategory parseCategory(String s) {
             if (s == null) return null;
 
             String t = s.trim();

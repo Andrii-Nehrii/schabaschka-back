@@ -16,6 +16,8 @@ public interface JobService {
     Page<JobDto> findPage(String city, JobCategory category, String q , int page, int size);
     long count(String city, JobCategory category, String q);
     Optional<JobDto> findById(long id);
+    Page<JobDto> findMyPage(long employerId, JobStatus status, String q, int page, int size);
+
 
     JobDto create(long employerId, NewJobDto newJobDto);
 

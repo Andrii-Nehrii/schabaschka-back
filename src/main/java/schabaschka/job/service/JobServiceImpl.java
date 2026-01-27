@@ -196,18 +196,81 @@ public class JobServiceImpl implements JobService {
     @Transactional
     public void delete(long employerId, long jobId) {
         SecurityUtils.requireRole("EMPLOYER");
-        Long currentUserId = SecurityUtils.getCurrentUserId();
-        if(employerId != currentUserId){
+
+        long currentUserId = SecurityUtils.getCurrentUserId();
+        if (employerId != currentUserId) {
             throw new AccessDeniedException("Forbidden");
         }
-        Job job = jobRepository.findById(jobId).orElseThrow(() -> new IllegalArgumentException("Job with id " + jobId + " not found"));
+
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new IllegalArgumentException("Job with id " + jobId + " not found"));
+
         Long employerIdFromDb = job.getEmployerId();
-        if (employerIdFromDb == null || employerIdFromDb != currentUserId) {
+        if (employerIdFromDb == null || employerIdFromDb.longValue() != currentUserId) {
             throw new IllegalArgumentException("Job with id " + jobId + " does not belong to employer " + employerId);
         }
-        jobRepository.delete(job);
 
+        jobRepository.delete(job);
     }
+
+    @Override
+    public Page<JobDto> findMyPage(long employerId, JobStatus status, String q, int page, int size) {
+        int pageIndex = Math.max(0, page);
+        int pageSize  = Math.max(1, size);
+
+        long total = countMy(employerId, status, q);
+        List<JobDto> items = findMy(employerId, status, q, pageIndex, pageSize);
+
+        return new PageImpl<>(items, PageRequest.of(pageIndex, pageSize), total);
+    }
+
+    private List<JobDto> findMy(long employerId, JobStatus status, String q, int page, int size) {
+        String normQ = normalize(q);
+        int pageIndex = Math.max(0, page);
+        int pageSize = Math.max(1, size);
+        long toSkip = (long) pageIndex * pageSize;
+
+        try (Stream<Job> stream = jobRepository.findAllBy()) {
+            Comparator<Job> byCreatedDesc = Comparator.comparing(Job::getCreatedAt).reversed();
+
+            return stream
+                    .filter(j -> j.getEmployerId() != null && j.getEmployerId().equals(employerId))
+                    .filter(j -> status == null || j.getStatus() == status)
+                    .filter(j -> {
+                        if (normQ == null) return true;
+                        String qLower = normQ.toLowerCase(Locale.ROOT);
+                        String title = j.getTitle();
+                        String desc  = j.getDescription();
+                        return (title != null && title.toLowerCase(Locale.ROOT).contains(qLower))
+                                || (desc != null && desc.toLowerCase(Locale.ROOT).contains(qLower));
+                    })
+                    .sorted(byCreatedDesc)
+                    .skip(toSkip)
+                    .limit(pageSize)
+                    .map(this::toDto)
+                    .collect(Collectors.toList());
+        }
+    }
+
+    private long countMy(long employerId, JobStatus status, String q) {
+        String normQ = normalize(q);
+
+        try (Stream<Job> stream = jobRepository.findAllBy()) {
+            return stream
+                    .filter(j -> j.getEmployerId() != null && j.getEmployerId().equals(employerId))
+                    .filter(j -> status == null || j.getStatus() == status)
+                    .filter(j -> {
+                        if (normQ == null) return true;
+                        String qLower = normQ.toLowerCase(Locale.ROOT);
+                        String title = j.getTitle();
+                        String desc  = j.getDescription();
+                        return (title != null && title.toLowerCase(Locale.ROOT).contains(qLower))
+                                || (desc != null && desc.toLowerCase(Locale.ROOT).contains(qLower));
+                    })
+                    .count();
+        }
+    }
+
 
 
     private String normalize(String s) {
