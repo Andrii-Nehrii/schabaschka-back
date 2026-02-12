@@ -20,13 +20,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Clean Security:
- * - Stateless JWT
- * - /api/auth/login + /api/auth/register = permitAll
- * - /api/health/** = permitAll
- * - всё остальное требует JWT
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {

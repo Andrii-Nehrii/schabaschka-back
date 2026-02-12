@@ -12,78 +12,78 @@ import java.nio.charset.StandardCharsets; //changed
 import java.time.Instant; //changed
 import java.util.Date; //changed
 
-@Component //changed
+@Component
 public class JwtTokenService { //changed
 
-    private final SecretKey secretKey; //changed
-    private final long expirationSeconds; //changed
+    private final SecretKey secretKey;
+    private final long expirationSeconds;
 
-    public JwtTokenService( //changed
-                            @Value("${security.jwt.secret:change-me-secret-change-me-secret-change-me-secret}") String secret, //changed
-                            @Value("${security.jwt.expiration-seconds:3600}") long expirationSeconds //changed
-    ) { //changed
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)); //changed
-        this.expirationSeconds = expirationSeconds; //changed
-    } //changed
+    public JwtTokenService(
+                            @Value("${security.jwt.secret:change-me-secret-change-me-secret-change-me-secret}") String secret,
+                            @Value("${security.jwt.expiration-seconds:3600}") long expirationSeconds
+    ) {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.expirationSeconds = expirationSeconds;
+    }
 
-    public String generateToken(Long userId, String email, String role) { //changed
-        if (userId == null || email == null) { //changed
-            throw new IllegalArgumentException("userId and email are required to generate token"); //changed
-        } //changed
+    public String generateToken(Long userId, String email, String role) {
+        if (userId == null || email == null) {
+            throw new IllegalArgumentException("userId and email are required to generate token");
+        }
 
-        Instant now = Instant.now(); //changed
-        Instant expiresAt = now.plusSeconds(expirationSeconds); //changed
+        Instant now = Instant.now();
+        Instant expiresAt = now.plusSeconds(expirationSeconds);
 
-        return Jwts.builder() //changed
-                .subject(String.valueOf(userId)) //changed
-                .claim("email", email) //changed
-                .claim("role", role) //changed
-                .issuedAt(Date.from(now)) //changed
-                .expiration(Date.from(expiresAt)) //changed
-                .signWith(secretKey) //changed
-                .compact(); //changed
-    } //changed
+        return Jwts.builder()
+                .subject(String.valueOf(userId))
+                .claim("email", email)
+                .claim("role", role)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiresAt))
+                .signWith(secretKey)
+                .compact();
+    }
 
-    public JwtUserData parseToken(String token) { //changed
-        if (token == null || token.isBlank()) { //changed
-            throw new IllegalArgumentException("token is empty"); //changed
-        } //changed
+    public JwtUserData parseToken(String token) {
+        if (token == null || token.isBlank()) {
+            throw new IllegalArgumentException("token is empty");
+        }
 
-        Jws<Claims> jws = Jwts.parser() //changed
-                .verifyWith(secretKey) //changed
-                .build() //changed
-                .parseSignedClaims(token); //changed
+        Jws<Claims> jws = Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token);
 
-        Claims claims = jws.getPayload(); //changed
+        Claims claims = jws.getPayload();
 
-        Long userId = Long.parseLong(claims.getSubject()); //changed
-        String email = claims.get("email", String.class); //changed
-        String role = claims.get("role", String.class); //changed
+        Long userId = Long.parseLong(claims.getSubject());
+        String email = claims.get("email", String.class);
+        String role = claims.get("role", String.class);
 
-        return new JwtUserData(userId, email, role); //changed
-    } //changed
+        return new JwtUserData(userId, email, role);
+    }
 
-    public static class JwtUserData { //changed
-        private final Long userId; //changed
-        private final String email; //changed
-        private final String role; //changed
+    public static class JwtUserData {
+        private final Long userId;
+        private final String email;
+        private final String role;
 
         public JwtUserData(Long userId, String email, String role) { //changed
-            this.userId = userId; //changed
-            this.email = email; //changed
-            this.role = role; //changed
-        } //changed
+            this.userId = userId;
+            this.email = email;
+            this.role = role;
+        }
 
-        public Long getUserId() { //changed
-            return userId; //changed
-        } //changed
+        public Long getUserId() {
+            return userId;
+        }
 
-        public String getEmail() { //changed
-            return email; //changed
-        } //changed
+        public String getEmail() {
+            return email;
+        }
 
-        public String getRole() { //changed
-            return role; //changed
-        } //changed
-    } //changed
-} //changed
+        public String getRole() {
+            return role;
+        }
+    }
+}

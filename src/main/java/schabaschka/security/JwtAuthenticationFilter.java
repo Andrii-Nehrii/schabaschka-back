@@ -11,12 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * JWT Filter:
- * - Не мешает /api/auth/** и OPTIONS
- * - Если токен битый — просто игнорируем (как будто токена нет),
- *   а Security сам решит, где нужно 401.
- */
+
 public class  JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenService jwtTokenService;
@@ -69,7 +64,7 @@ public class  JwtAuthenticationFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception e) {
-            // Битый токен = просто не авторизован. Не ставим 401 тут, чтобы permitAll реально работал.
+
             SecurityContextHolder.clearContext();
         }
 
